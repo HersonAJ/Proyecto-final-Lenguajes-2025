@@ -1,0 +1,157 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package com.mycompany.proyecto_2_lenguajes_2025.Frontend;
+import com.formdev.flatlaf.FlatLightLaf;
+import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import javax.swing.*;
+/**
+ *
+ * @author herson
+ */
+public class Interfaz extends JFrame {
+
+    private JTextPane textPane1;
+    private JLabel posLabel;
+    private JLabel errorLabel;
+    private JButton boton;
+    private JTextArea errorTextArea;
+    private JScrollPane errorScrollPane;
+
+    public Interfaz() {
+        try {
+            UIManager.setLookAndFeel(new FlatLightLaf());
+        } catch (UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
+
+        setTitle("Analizador Lexico Sintactico");
+        setSize(1000, 800);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+
+        // Crear la barra de menú
+        JMenuBar menuBar = new JMenuBar();
+
+        // Menú Archivo
+        JMenu archivoMenu = new JMenu("Archivo");
+        JMenuItem nuevoItem = new JMenuItem("Nuevo");
+        JMenuItem abrirItem = new JMenuItem("Abrir");
+        JMenuItem guardarItem = new JMenuItem("Guardar");
+        JMenuItem guardarComoItem = new JMenuItem("Guardar como");
+        archivoMenu.add(nuevoItem);
+        archivoMenu.add(abrirItem);
+        archivoMenu.add(guardarItem);
+        archivoMenu.add(guardarComoItem);
+
+        // Menú Editar
+        JMenu editarMenu = new JMenu("Editar");
+        JMenuItem copiarItem = new JMenuItem("Copiar");
+        JMenuItem pegarItem = new JMenuItem("Pegar");
+        JMenuItem deshacerItem = new JMenuItem("Deshacer");
+        JMenuItem rehacerItem = new JMenuItem("Rehacer");
+        editarMenu.add(copiarItem);
+        editarMenu.add(pegarItem);
+        editarMenu.add(deshacerItem);
+        editarMenu.add(rehacerItem);
+
+        // Menú Ayuda
+        JMenu ayudaMenu = new JMenu("Ayuda");
+        JMenuItem acercaDeItem = new JMenuItem("Acerca de");
+        ayudaMenu.add(acercaDeItem);
+
+        // Añadir menús a la barra de menú
+        menuBar.add(archivoMenu);
+        menuBar.add(editarMenu);
+        menuBar.add(ayudaMenu);
+        setJMenuBar(menuBar);
+
+        // Crear el JTextPane con números de línea
+        textPane1 = new JTextPane();
+        LineNumberingTextArea lineNumberingTextPane = new LineNumberingTextArea(textPane1);
+        lineNumberingTextPane.setEditable(false);
+
+        // Crear un JScrollPane que contenga ambos JTextPanes
+        JScrollPane scrollPane = new JScrollPane(textPane1);
+        scrollPane.setRowHeaderView(lineNumberingTextPane);
+
+        // Crear la etiqueta para la posición del cursor
+        posLabel = new JLabel("Fila 1, Palabra 1");
+
+        // Crear la etiqueta para el mensaje de error
+        errorLabel = new JLabel(" ");
+        errorLabel.setForeground(Color.RED);
+
+        // Crear el área para errores
+        errorTextArea = new JTextArea();
+        errorTextArea.setEditable(false);
+        errorTextArea.setForeground(Color.RED);
+        errorScrollPane = new JScrollPane(errorTextArea); 
+        errorScrollPane.setVisible(false); // Oculto inicialmente
+
+        // Actualizar la posición del cursor
+        textPane1.addCaretListener(e -> {
+            int caretPosition = textPane1.getCaretPosition();
+            int line = 0, column = 0;
+            try {
+                line = textPane1.getDocument().getDefaultRootElement().getElementIndex(caretPosition) + 1;
+                int start = textPane1.getDocument().getDefaultRootElement().getElement(line - 1).getStartOffset();
+
+                column = caretPosition - start + 1;
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+            posLabel.setText("Fila " + line + ", Columna " + column);
+        });
+
+        // Configurar el layout del JFrame usando GridBagLayout
+        setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+
+        // Configurar scrollPane
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        gbc.fill = GridBagConstraints.BOTH;
+        add(scrollPane, gbc);
+
+        // Configurar botón "Analizar"
+        boton = new JButton("Analizar");
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.weightx = 0;
+        gbc.weighty = 0;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.LINE_START; // Ubicado en la parte inferior izquierda
+        add(boton, gbc);
+
+        // Añadir el JLabel para la posición del cursor
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.anchor = GridBagConstraints.LINE_END; // Ubicado en la parte inferior derecha
+        add(posLabel, gbc);
+
+        // Añadir el JScrollPane del TextArea de errores
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.weighty = 0.2;
+        gbc.fill = GridBagConstraints.BOTH;
+        add(errorScrollPane, gbc);
+    }
+
+    // Método para mostrar errores
+    public void mostrarErrores(String errores) {
+        if (errores == null || errores.isEmpty()) {
+            errorScrollPane.setVisible(false); // Ocultar el JScrollPane
+        } else {
+            errorTextArea.setText(errores);
+            errorScrollPane.setVisible(true); // Mostrar el JScrollPane
+        }
+    }
+}
+
+
