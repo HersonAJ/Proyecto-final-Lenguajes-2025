@@ -3,11 +3,20 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.mycompany.proyecto_2_lenguajes_2025.Frontend;
+
 import com.formdev.flatlaf.FlatLightLaf;
+import com.mycompany.proyecto_2_lenguajes_2025.Backend.AnalisisLexico.AnalizadorLexico;
+import com.mycompany.proyecto_2_lenguajes_2025.Lexer.ErrorToken;
+import com.mycompany.proyecto_2_lenguajes_2025.Lexer.Token;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.*;
+
 /**
  *
  * @author herson
@@ -20,6 +29,7 @@ public class Interfaz extends JFrame {
     private JButton boton;
     private JTextArea errorTextArea;
     private JScrollPane errorScrollPane;
+    private List<Token> tokens;
 
     public Interfaz() {
         try {
@@ -63,10 +73,15 @@ public class Interfaz extends JFrame {
         JMenuItem acercaDeItem = new JMenuItem("Acerca de");
         ayudaMenu.add(acercaDeItem);
 
+        JMenu reportesMenu = new JMenu("Reportes");
+        JMenuItem reporteTokensItem = new JMenuItem("Reporte de Tokens");
+        reportesMenu.add(reporteTokensItem);
+
         // Añadir menús a la barra de menú
         menuBar.add(archivoMenu);
         menuBar.add(editarMenu);
         menuBar.add(ayudaMenu);
+        menuBar.add(reportesMenu);
         setJMenuBar(menuBar);
 
         // Crear el JTextPane con números de línea
@@ -89,7 +104,7 @@ public class Interfaz extends JFrame {
         errorTextArea = new JTextArea();
         errorTextArea.setEditable(false);
         errorTextArea.setForeground(Color.RED);
-        errorScrollPane = new JScrollPane(errorTextArea); 
+        errorScrollPane = new JScrollPane(errorTextArea);
         errorScrollPane.setVisible(false); // Oculto inicialmente
 
         // Actualizar la posición del cursor
@@ -107,7 +122,6 @@ public class Interfaz extends JFrame {
             posLabel.setText("Fila " + line + ", Columna " + column);
         });
 
-        // Configurar el layout del JFrame usando GridBagLayout
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
 
@@ -126,13 +140,13 @@ public class Interfaz extends JFrame {
         gbc.weightx = 0;
         gbc.weighty = 0;
         gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.LINE_START; // Ubicado en la parte inferior izquierda
+        gbc.anchor = GridBagConstraints.LINE_START;
         add(boton, gbc);
 
         // Añadir el JLabel para la posición del cursor
         gbc.gridx = 0;
         gbc.gridy = 2;
-        gbc.anchor = GridBagConstraints.LINE_END; // Ubicado en la parte inferior derecha
+        gbc.anchor = GridBagConstraints.LINE_END;
         add(posLabel, gbc);
 
         // Añadir el JScrollPane del TextArea de errores
@@ -141,17 +155,63 @@ public class Interfaz extends JFrame {
         gbc.weighty = 0.2;
         gbc.fill = GridBagConstraints.BOTH;
         add(errorScrollPane, gbc);
+
+        boton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                realizarAnalisisLexico();
+            }
+        });
+
+        reporteTokensItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                abrirReporteTokens();
+            }
+        });
+
+    }
+
+    private void realizarAnalisisLexico() {
+        String textoEntrada = textPane1.getText().trim();
+        AnalizadorLexico analizador = new AnalizadorLexico();
+        List<ErrorToken> errores = new ArrayList<>();
+        errores.clear();
+        tokens = analizador.realizarAnalisis(textoEntrada, errores);
+
+        if (!errores.isEmpty()) {
+            StringBuilder erroresTexto = new StringBuilder();
+            for (ErrorToken error : errores) {
+                erroresTexto.append(error.toString()).append("\n");
+            }
+            mostrarErrores(erroresTexto.toString());
+        } else {
+            mostrarErrores(null);
+        }
     }
 
     // Método para mostrar errores
     public void mostrarErrores(String errores) {
         if (errores == null || errores.isEmpty()) {
-            errorScrollPane.setVisible(false); // Ocultar el JScrollPane
+            errorScrollPane.setVisible(false);
         } else {
             errorTextArea.setText(errores);
-            errorScrollPane.setVisible(true); // Mostrar el JScrollPane
+            errorScrollPane.setVisible(true);
+        }
+        this.revalidate();
+        this.repaint();
+    }
+
+    private void abrirReporteTokens() {
+        if (tokens != null && !tokens.isEmpty()) {
+            if (errorScrollPane.isVisible()) {
+                JOptionPane.showMessageDialog(this, "No se puede mostrar el reporte de tokens debido a errores léxicos.", "Error", JOptionPane.ERROR_MESSAGE);
+            } else {
+                SwingUtilities.invokeLater(() -> new ReporteToken(tokens).setVisible(true));
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "No hay tokens disponibles para mostrar.", "Reporte de Tokens", JOptionPane.INFORMATION_MESSAGE);
         }
     }
+
 }
-
-
