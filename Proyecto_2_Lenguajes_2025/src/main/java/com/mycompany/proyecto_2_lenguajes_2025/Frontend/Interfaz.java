@@ -5,6 +5,7 @@
 package com.mycompany.proyecto_2_lenguajes_2025.Frontend;
 
 import com.formdev.flatlaf.FlatLightLaf;
+import com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico.AnalizadorSintactico;
 import com.mycompany.proyecto_2_lenguajes_2025.Backend.AnalisisLexico.AnalizadorLexico;
 import com.mycompany.proyecto_2_lenguajes_2025.Lexer.ErrorToken;
 import com.mycompany.proyecto_2_lenguajes_2025.Lexer.Token;
@@ -30,6 +31,7 @@ public class Interfaz extends JFrame {
     private JTextArea errorTextArea;
     private JScrollPane errorScrollPane;
     private List<Token> tokens;
+    private JButton botonSintactico;
 
     public Interfaz() {
         try {
@@ -134,14 +136,20 @@ public class Interfaz extends JFrame {
         add(scrollPane, gbc);
 
         // Configurar botón "Analizar"
-        boton = new JButton("Analizar");
+        boton = new JButton("Analisis Lexico");
         gbc.gridx = 0;
         gbc.gridy = 1;
-        gbc.weightx = 0;
+        gbc.weightx = 0.5;
         gbc.weighty = 0;
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.LINE_START;
         add(boton, gbc);
+
+        botonSintactico = new JButton("Análisis Sintáctico");
+        botonSintactico.setEnabled(false); 
+        gbc.gridy = 4; 
+        gbc.anchor = GridBagConstraints.LINE_START; 
+        add(botonSintactico, gbc);
 
         // Añadir el JLabel para la posición del cursor
         gbc.gridx = 0;
@@ -170,6 +178,13 @@ public class Interfaz extends JFrame {
             }
         });
 
+        //analisis sintactico
+        botonSintactico.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                realizarAnalisisSintactico();
+            }
+        });
     }
 
     private void realizarAnalisisLexico() {
@@ -187,6 +202,11 @@ public class Interfaz extends JFrame {
             mostrarErrores(erroresTexto.toString());
         } else {
             mostrarErrores(null);
+        }
+        if (!errores.isEmpty()) {
+            botonSintactico.setEnabled(false);
+        } else {
+            botonSintactico.setEnabled(true);
         }
     }
 
@@ -214,4 +234,12 @@ public class Interfaz extends JFrame {
         }
     }
 
+    private void realizarAnalisisSintactico() {
+        if (tokens != null && !tokens.isEmpty()) {
+            AnalizadorSintactico analizadorSintactico = new AnalizadorSintactico(tokens);
+            analizadorSintactico.analizar(); 
+        } else {
+            JOptionPane.showMessageDialog(this, "No hay tokens disponibles para analizar.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
 }
