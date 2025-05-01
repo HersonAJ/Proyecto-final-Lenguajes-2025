@@ -6,6 +6,8 @@ package com.mycompany.proyecto_2_lenguajes_2025.Frontend;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico.AnalizadorSintactico;
+import com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico.GeneradorSalida;
+import com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico.ParseAsignacion;
 import com.mycompany.proyecto_2_lenguajes_2025.Backend.AnalisisLexico.AnalizadorLexico;
 import com.mycompany.proyecto_2_lenguajes_2025.Lexer.ErrorToken;
 import com.mycompany.proyecto_2_lenguajes_2025.Lexer.Token;
@@ -240,9 +242,12 @@ public class Interfaz extends JFrame {
             String erroresSintacticos = analizadorSintactico.analizar();
 
             if (erroresSintacticos != null && !erroresSintacticos.isEmpty()) {
-                mostrarErrores(erroresSintacticos); 
+                mostrarErrores(erroresSintacticos);
             } else {
-                mostrarErrores(""); 
+                mostrarErrores("");
+
+                GeneradorSalida generador = new GeneradorSalida(tokens, ParseAsignacion.tablaSimbolos);
+                generador.generarArchivo();
             }
         } else {
             JOptionPane.showMessageDialog(this, "No hay tokens disponibles para analizar.", "Error", JOptionPane.ERROR_MESSAGE);

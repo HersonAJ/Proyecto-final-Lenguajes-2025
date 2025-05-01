@@ -6,6 +6,7 @@ package com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico;
 
 import com.mycompany.proyecto_2_lenguajes_2025.Lexer.Token;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -36,6 +37,7 @@ public class AnalizadorSintactico {
                     agregarError(tokenActual, "Estructura ASIGNACIÓN inválida. Se esperaba una EXPRESIÓN seguida de 'END'.");
                 } else {
                     System.out.println("Estructura ASIGNACIÓN reconocida correctamente.");
+                    mostrarTablaSimbolos(); 
                 }
             } else if (tokenActual.getValor().equals("PRINT")) {
                 System.out.println("Intentando reconocer estructura PRINT...");
@@ -78,7 +80,7 @@ public class AnalizadorSintactico {
     }
 
     private void agregarError(Token token, String mensaje) {
-        erroresSintacticos.append("Error Sintactico en línea ")
+        erroresSintacticos.append("Error Sintáctico en línea ")
                 .append(token.getLinea())
                 .append(", columna ")
                 .append(token.getColumna())
@@ -140,5 +142,13 @@ public class AnalizadorSintactico {
         if (posicion < tokens.size()) {
             posicion++;
         }
+    }
+
+    private void mostrarTablaSimbolos() {
+        System.out.println("\nTabla de Asignaciones (Variables y Valores):");
+        for (Map.Entry<String, String> entry : ParseAsignacion.tablaSimbolos.entrySet()) {
+            System.out.println(entry.getKey() + " = " + entry.getValue());
+        }
+        System.out.println("--------------------------------------\n");
     }
 }
