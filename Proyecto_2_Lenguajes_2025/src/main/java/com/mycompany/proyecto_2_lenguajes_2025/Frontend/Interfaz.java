@@ -146,9 +146,9 @@ public class Interfaz extends JFrame {
         add(boton, gbc);
 
         botonSintactico = new JButton("Análisis Sintáctico");
-        botonSintactico.setEnabled(false); 
-        gbc.gridy = 4; 
-        gbc.anchor = GridBagConstraints.LINE_START; 
+        botonSintactico.setEnabled(false);
+        gbc.gridy = 4;
+        gbc.anchor = GridBagConstraints.LINE_START;
         add(botonSintactico, gbc);
 
         // Añadir el JLabel para la posición del cursor
@@ -237,9 +237,16 @@ public class Interfaz extends JFrame {
     private void realizarAnalisisSintactico() {
         if (tokens != null && !tokens.isEmpty()) {
             AnalizadorSintactico analizadorSintactico = new AnalizadorSintactico(tokens);
-            analizadorSintactico.analizar(); 
+            String erroresSintacticos = analizadorSintactico.analizar();
+
+            if (erroresSintacticos != null && !erroresSintacticos.isEmpty()) {
+                mostrarErrores(erroresSintacticos); 
+            } else {
+                mostrarErrores(""); 
+            }
         } else {
             JOptionPane.showMessageDialog(this, "No hay tokens disponibles para analizar.", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 }
