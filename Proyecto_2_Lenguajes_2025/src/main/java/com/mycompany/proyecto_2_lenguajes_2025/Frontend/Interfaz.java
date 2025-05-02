@@ -6,6 +6,7 @@ package com.mycompany.proyecto_2_lenguajes_2025.Frontend;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico.AnalizadorSintactico;
+import com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico.AnalizadorSintactico2;
 import com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico.GeneradorSalida;
 import com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico.ParseAsignacion;
 import com.mycompany.proyecto_2_lenguajes_2025.Backend.AnalisisLexico.AnalizadorLexico;
@@ -17,7 +18,9 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.*;
 
 /**
@@ -236,7 +239,7 @@ public class Interfaz extends JFrame {
         }
     }
 
-    private void realizarAnalisisSintactico() {
+    /*  private void realizarAnalisisSintactico() {
         if (tokens != null && !tokens.isEmpty()) {
             AnalizadorSintactico analizadorSintactico = new AnalizadorSintactico(tokens);
             String erroresSintacticos = analizadorSintactico.analizar();
@@ -248,6 +251,47 @@ public class Interfaz extends JFrame {
 
                 GeneradorSalida generador = new GeneradorSalida(tokens, ParseAsignacion.tablaSimbolos);
                 generador.generarArchivo();
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "No hay tokens disponibles para analizar.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+   }*/
+ /*
+private void realizarAnalisisSintactico() {
+    if (tokens != null && !tokens.isEmpty()) {
+        AnalizadorSintactico2 analizadorSintactico = new AnalizadorSintactico2(tokens);
+        try {
+            double resultado = analizadorSintactico.parse();
+            System.out.println("El resultado de la operación es: " + resultado);
+            mostrarErrores("");
+            GeneradorSalida generador = new GeneradorSalida(tokens, ParseAsignacion.tablaSimbolos);
+            generador.generarArchivo();
+        } catch (AnalizadorSintactico2.ErrorSintactico e) {
+            mostrarErrores(e.getMessage());
+        }
+    } else {
+        JOptionPane.showMessageDialog(this, "No hay tokens disponibles para analizar.", "Error", JOptionPane.ERROR_MESSAGE);
+    }
+}
+     */
+    private void realizarAnalisisSintactico() {
+        if (tokens != null && !tokens.isEmpty()) {
+            AnalizadorSintactico2 analizadorSintactico = new AnalizadorSintactico2(tokens);
+            try {
+                analizadorSintactico.parse();
+                mostrarErrores("");
+                Map<String, String> tablaSimbolosString = new HashMap<>();
+                for (Map.Entry<String, Double> entry : analizadorSintactico.getTablaSimbolos().entrySet()) {
+                    tablaSimbolosString.put(entry.getKey(), String.valueOf(entry.getValue()));
+                }
+                System.out.println("Tabla de símbolos:");
+                for (Map.Entry<String, String> entry : tablaSimbolosString.entrySet()) {
+                    System.out.println(entry.getKey() + " = " + entry.getValue());
+                }
+                GeneradorSalida generador = new GeneradorSalida(tokens, tablaSimbolosString);
+                generador.generarArchivo();
+            } catch (AnalizadorSintactico2.ErrorSintactico e) {
+                mostrarErrores(e.getMessage());
             }
         } else {
             JOptionPane.showMessageDialog(this, "No hay tokens disponibles para analizar.", "Error", JOptionPane.ERROR_MESSAGE);
