@@ -279,19 +279,31 @@ private void realizarAnalisisSintactico() {
             AnalizadorSintactico2 analizadorSintactico = new AnalizadorSintactico2(tokens);
             try {
                 analizadorSintactico.parse();
-                mostrarErrores("");
+
+                List<String> errores = analizadorSintactico.mostrarErrores();
+                if (!errores.isEmpty()) {
+                    mostrarErrores(String.join("\n", errores)); 
+                    return; 
+                } else {
+                    mostrarErrores("");
+                }
+
                 Map<String, String> tablaSimbolosString = new HashMap<>();
                 for (Map.Entry<String, Double> entry : analizadorSintactico.getTablaSimbolos().entrySet()) {
                     tablaSimbolosString.put(entry.getKey(), String.valueOf(entry.getValue()));
                 }
+
                 System.out.println("Tabla de símbolos:");
                 for (Map.Entry<String, String> entry : tablaSimbolosString.entrySet()) {
                     System.out.println(entry.getKey() + " = " + entry.getValue());
                 }
+
+                // **Solo generar archivo si no hay errores sintácticos**
                 GeneradorSalida generador = new GeneradorSalida(tokens, tablaSimbolosString);
                 generador.generarArchivo();
+
             } catch (AnalizadorSintactico2.ErrorSintactico e) {
-                mostrarErrores(e.getMessage());
+                mostrarErrores(e.getMessage()); // Captura errores sintácticos si ocurren
             }
         } else {
             JOptionPane.showMessageDialog(this, "No hay tokens disponibles para analizar.", "Error", JOptionPane.ERROR_MESSAGE);
