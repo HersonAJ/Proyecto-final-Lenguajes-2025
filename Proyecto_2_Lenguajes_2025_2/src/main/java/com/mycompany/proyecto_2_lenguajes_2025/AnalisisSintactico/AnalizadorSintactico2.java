@@ -31,16 +31,21 @@ public class AnalizadorSintactico2 {
 
     public void parse() {
         while (!tokenActual.getTipo().equals("EOF")) {
-            if (tokenActual.getTipo().equals("IDENTIFICADOR")) {
+            if (tokenActual.getTipo().equals("COMENTARIO_LINEA") || tokenActual.getTipo().equals("COMENTARIO_BLOQUE")) {
+                consumirToken(); // Ignorar comentarios sin generar error
+            } else if (tokenActual.getTipo().equals("IDENTIFICADOR")) {
                 asignacion();
             } else if (tokenActual.getValor().equals("PRINT")) {
                 estructuraPrint();
+            } else if (tokenActual.getValor().equals("REPEAT")) {
+                estructuraRepeat();
+            } else if (tokenActual.getValor().equals("IF")) {
+                estructuraCondicional();
             } else if (tokenActual.getTipo().equals("NUMERO_ENTERO") || tokenActual.getValor().equals("(")) {
                 double resultado = expresion();
                 System.out.println("Resultado de la expresión: " + resultado);
             } else {
-                agregarError(tokenActual, "Entrada no válida. Se esperaba un número, identificador, expresión o PRINT.");
-                consumirToken(); // Evitar bucle infinito
+                consumirToken(); // Ignorar cualquier otro token desconocido sin error
             }
         }
     }
@@ -159,6 +164,161 @@ public class AnalizadorSintactico2 {
             consumirToken();
         } else {
             agregarError(tokenActual, "Se esperaba la palabra reservada END después de PRINT.");
+        }
+    }
+
+    private void estructuraRepeat() {
+        consumirToken(); // Avanzar después de "REPEAT"
+
+        int repeticiones = 0;
+        if (tokenActual.getTipo().equals("NUMERO_ENTERO")) {
+            repeticiones = Integer.parseInt(tokenActual.getValor());
+            consumirToken();
+        } else if (tokenActual.getTipo().equals("IDENTIFICADOR")) {
+            if (tablaSimbolos.containsKey(tokenActual.getValor())) {
+                repeticiones = tablaSimbolos.get(tokenActual.getValor()).intValue();
+                consumirToken();
+            } else {
+                agregarError(tokenActual, "Identificador no declarado en REPEAT.");
+                consumirToken();
+                return;
+            }
+        } else {
+            agregarError(tokenActual, "REPEAT esperaba un número entero positivo o un identificador.");
+            consumirToken();
+            return;
+        }
+
+        // Validar que siga INIT
+        if (!tokenActual.getValor().equals("INIT")) {
+            agregarError(tokenActual, "Se esperaba INIT después de REPEAT.");
+            return;
+        }
+        consumirToken(); // Avanzar después de INIT
+
+        // Guardar los valores PRINT dentro del REPEAT
+        List<String> valoresPrint = new ArrayList<>();
+        while (!tokenActual.getValor().equals("END") && !tokenActual.getTipo().equals("EOF")) {
+            if (tokenActual.getValor().equals("PRINT")) {
+                valoresPrint.add(procesarPrint());
+            } else {
+                agregarError(tokenActual, "Se esperaba una estructura PRINT dentro de REPEAT.");
+                consumirToken();
+            }
+        }
+
+        // Verificar que termine con END
+        if (!tokenActual.getValor().equals("END")) {
+            agregarError(tokenActual, "Se esperaba la palabra reservada END para finalizar REPEAT.");
+            return;
+        }
+        consumirToken();
+
+        // Ejecutar las repeticiones
+        for (int i = 0; i < repeticiones; i++) {
+            for (String valor : valoresPrint) {
+                System.out.println(valor);
+            }
+        }
+    }
+
+    private String procesarPrint() {
+        consumirToken(); // Avanzar después de "PRINT"
+        String resultado = "";
+
+        if (tokenActual.getTipo().equals("LITERAL")) {
+            resultado = tokenActual.getValor().replace("\"", ""); // Sin comillas
+            consumirToken();
+        } else if (tokenActual.getTipo().equals("NUMERO_ENTERO")) {
+            resultado = tokenActual.getValor(); // Número sin cambios
+            consumirToken();
+        } else if (tokenActual.getTipo().equals("IDENTIFICADOR")) {
+            if (tablaSimbolos.containsKey(tokenActual.getValor())) {
+                resultado = String.valueOf(tablaSimbolos.get(tokenActual.getValor())); // Valor de la variable
+                consumirToken();
+            } else {
+                agregarError(tokenActual, "Identificador no declarado en PRINT.");
+                consumirToken();
+            }
+        } else {
+            agregarError(tokenActual, "PRINT esperaba un literal, número o identificador.");
+            consumirToken();
+        }
+
+        // Verificar que siga END
+        if (!tokenActual.getValor().equalsIgnoreCase("END")) {
+            agregarError(tokenActual, "Se esperaba la palabra reservada END después de PRINT.");
+        } else {
+            consumirToken();
+        }
+
+        return resultado;
+    }
+
+    private void estructuraCondicional() {
+        consumirToken(); // Avanzar después de "IF"
+
+        boolean condicion = false;
+        if (tokenActual.getValor().equals("TRUE")) {
+            condicion = true;
+            consumirToken();
+        } else if (tokenActual.getValor().equals("FALSE")) {
+            condicion = false;
+            consumirToken();
+        } else {
+            agregarError(tokenActual, "IF esperaba TRUE o FALSE.");
+            consumirToken();
+            return;
+        }
+
+        // Validar que siga THEN
+        if (!tokenActual.getValor().equals("THEN")) {
+            agregarError(tokenActual, "Se esperaba THEN después de IF.");
+            return;
+        }
+        consumirToken(); // Avanzar después de THEN
+
+        if (condicion) {
+            // Ejecutar instrucciones hasta encontrar END del IF
+            while (!tokenActual.getValor().equals("END") && !tokenActual.getTipo().equals("EOF")) {
+                if (tokenActual.getTipo().equals("IDENTIFICADOR")) {
+                    asignacion();
+                } else if (tokenActual.getValor().equals("PRINT")) {
+                    estructuraPrint();
+                } else if (tokenActual.getValor().equals("REPEAT")) {
+                    estructuraRepeat();
+                } else if (tokenActual.getValor().equals("IF")) {
+                    estructuraCondicional();
+                } else if (tokenActual.getTipo().equals("NUMERO_ENTERO") || tokenActual.getValor().equals("(")) {
+                    double resultado = expresion();
+                    System.out.println("Resultado de la expresión: " + resultado);
+                } else {
+                    agregarError(tokenActual, "Entrada no válida dentro de IF.");
+                    consumirToken();
+                }
+            }
+        } else {
+            // Ignorar estructuras anidadas hasta encontrar el END del IF externo
+            int nivel = 1; // Nivel de anidamiento de estructuras que usan END
+
+            while (nivel > 0 && !tokenActual.getTipo().equals("EOF")) {
+                if (tokenActual.getValor().equals("IF") || tokenActual.getValor().equals("PRINT") || tokenActual.getValor().equals("REPEAT")) {
+                    nivel++;
+                } else if (tokenActual.getValor().equals("END")) {
+                    nivel--;
+                }
+
+                if (nivel > 0) {
+                    consumirToken(); // No consumir el END final del IF aún
+                }
+            }
+        }
+
+        // Ahora consumir END que cierra el IF
+        if (!tokenActual.getValor().equals("END")) {
+            agregarError(tokenActual, "Se esperaba la palabra reservada END para finalizar IF.");
+        } else {
+            consumirToken(); // Consumir el END del IF
         }
     }
 

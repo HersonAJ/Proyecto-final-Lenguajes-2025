@@ -5,10 +5,8 @@
 package com.mycompany.proyecto_2_lenguajes_2025.Frontend;
 
 import com.formdev.flatlaf.FlatLightLaf;
-import com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico.AnalizadorSintactico;
 import com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico.AnalizadorSintactico2;
 import com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico.GeneradorSalida;
-import com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico.ParseAsignacion;
 import com.mycompany.proyecto_2_lenguajes_2025.Backend.AnalisisLexico.AnalizadorLexico;
 import com.mycompany.proyecto_2_lenguajes_2025.Lexer.ErrorToken;
 import com.mycompany.proyecto_2_lenguajes_2025.Lexer.Token;
@@ -249,7 +247,7 @@ public class Interfaz extends JFrame {
                 }
             }
         });
-        
+
         Nuevo gestorNuevo = new Nuevo(textPane1, errorTextArea, errorScrollPane, botonSintactico, tokens);
         nuevoItem.addActionListener(new ActionListener() {
             @Override
@@ -307,41 +305,6 @@ public class Interfaz extends JFrame {
         }
     }
 
-    /*  private void realizarAnalisisSintactico() {
-        if (tokens != null && !tokens.isEmpty()) {
-            AnalizadorSintactico analizadorSintactico = new AnalizadorSintactico(tokens);
-            String erroresSintacticos = analizadorSintactico.analizar();
-
-            if (erroresSintacticos != null && !erroresSintacticos.isEmpty()) {
-                mostrarErrores(erroresSintacticos);
-            } else {
-                mostrarErrores("");
-
-                GeneradorSalida generador = new GeneradorSalida(tokens, ParseAsignacion.tablaSimbolos);
-                generador.generarArchivo();
-            }
-        } else {
-            JOptionPane.showMessageDialog(this, "No hay tokens disponibles para analizar.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-   }*/
- /*
-private void realizarAnalisisSintactico() {
-    if (tokens != null && !tokens.isEmpty()) {
-        AnalizadorSintactico2 analizadorSintactico = new AnalizadorSintactico2(tokens);
-        try {
-            double resultado = analizadorSintactico.parse();
-            System.out.println("El resultado de la operación es: " + resultado);
-            mostrarErrores("");
-            GeneradorSalida generador = new GeneradorSalida(tokens, ParseAsignacion.tablaSimbolos);
-            generador.generarArchivo();
-        } catch (AnalizadorSintactico2.ErrorSintactico e) {
-            mostrarErrores(e.getMessage());
-        }
-    } else {
-        JOptionPane.showMessageDialog(this, "No hay tokens disponibles para analizar.", "Error", JOptionPane.ERROR_MESSAGE);
-    }
-}
-     */
     private void realizarAnalisisSintactico() {
         if (tokens != null && !tokens.isEmpty()) {
             AnalizadorSintactico2 analizadorSintactico = new AnalizadorSintactico2(tokens);
@@ -350,12 +313,16 @@ private void realizarAnalisisSintactico() {
 
                 List<String> errores = analizadorSintactico.mostrarErrores();
                 if (!errores.isEmpty()) {
+                    System.out.println("Errores encontrados en el análisis sintáctico:");
+                    System.out.println(String.join("\n", errores)); // Mostrar los errores en consola
                     mostrarErrores(String.join("\n", errores));
                     return;
                 } else {
-                    mostrarErrores("");
+                    System.out.println("No se encontraron errores sintácticos."); // Mensaje para depuración
+                    mostrarErrores(""); // Limpiar área de errores si no hay problemas
                 }
 
+                // Convertir tabla de símbolos a string
                 Map<String, String> tablaSimbolosString = new HashMap<>();
                 for (Map.Entry<String, Double> entry : analizadorSintactico.getTablaSimbolos().entrySet()) {
                     tablaSimbolosString.put(entry.getKey(), String.valueOf(entry.getValue()));
@@ -366,11 +333,17 @@ private void realizarAnalisisSintactico() {
                     System.out.println(entry.getKey() + " = " + entry.getValue());
                 }
 
-                // **Solo generar archivo si no hay errores sintácticos**
-                GeneradorSalida generador = new GeneradorSalida(tokens, tablaSimbolosString);
-                generador.generarArchivo();
+                // **Solo generar archivo si NO hay errores sintácticos**
+                if (errores.isEmpty()) {
+                    System.out.println("GeneradorSalida se ejecutará.");
+                    GeneradorSalida generador = new GeneradorSalida(tokens, tablaSimbolosString);
+                    generador.generarArchivo();
+                } else {
+                    System.out.println("GeneradorSalida NO se ejecutará debido a errores sintácticos.");
+                }
 
             } catch (AnalizadorSintactico2.ErrorSintactico e) {
+                System.out.println("Se capturó un ErrorSintáctico: " + e.getMessage());
                 mostrarErrores(e.getMessage()); // Captura errores sintácticos si ocurren
             }
         } else {
