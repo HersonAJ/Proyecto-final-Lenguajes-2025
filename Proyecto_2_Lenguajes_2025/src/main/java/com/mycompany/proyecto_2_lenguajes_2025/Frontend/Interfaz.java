@@ -17,11 +17,16 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.*;
+import javax.swing.undo.UndoManager;
 
 /**
  *
@@ -37,6 +42,7 @@ public class Interfaz extends JFrame {
     private JScrollPane errorScrollPane;
     private List<Token> tokens;
     private JButton botonSintactico;
+    private final UndoManager undoManager = new UndoManager();
 
     public Interfaz() {
         try {
@@ -66,12 +72,8 @@ public class Interfaz extends JFrame {
 
         // Menú Editar
         JMenu editarMenu = new JMenu("Editar");
-        JMenuItem copiarItem = new JMenuItem("Copiar");
-        JMenuItem pegarItem = new JMenuItem("Pegar");
         JMenuItem deshacerItem = new JMenuItem("Deshacer");
         JMenuItem rehacerItem = new JMenuItem("Rehacer");
-        editarMenu.add(copiarItem);
-        editarMenu.add(pegarItem);
         editarMenu.add(deshacerItem);
         editarMenu.add(rehacerItem);
 
@@ -99,6 +101,7 @@ public class Interfaz extends JFrame {
         // Crear un JScrollPane que contenga ambos JTextPanes
         JScrollPane scrollPane = new JScrollPane(textPane1);
         scrollPane.setRowHeaderView(lineNumberingTextPane);
+        textPane1.getDocument().addUndoableEditListener(e -> undoManager.addEdit(e.getEdit()));
 
         // Crear la etiqueta para la posición del cursor
         posLabel = new JLabel("Fila 1, Palabra 1");
@@ -190,6 +193,71 @@ public class Interfaz extends JFrame {
                 realizarAnalisisSintactico();
             }
         });
+
+        //cargar archivo
+        abrirItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                abrirArchivo();
+            }
+        });
+
+        Guardar gestorArchivo = new Guardar();
+
+        guardarItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                gestorArchivo.guardarArchivo(textPane1);
+            }
+        });
+
+        guardarComoItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                gestorArchivo.guardarComoArchivo(textPane1);
+            }
+        });
+
+        acercaDeItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(null,
+                        "Analizador Léxico Sintáctico\nCurso: Lenguajes Formales y De Programación\nDesarrollador: Herson Isaías Aguilar Juárez",
+                        "Acerca de", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        // Definir UndoManager en Interfaz
+        deshacerItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (undoManager.canUndo()) {
+                    undoManager.undo();
+                } else {
+                    JOptionPane.showMessageDialog(null, "No hay más acciones para deshacer.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        });
+
+        rehacerItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (undoManager.canRedo()) {
+                    undoManager.redo();
+                } else {
+                    JOptionPane.showMessageDialog(null, "No hay más acciones para rehacer.", "Advertencia", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        });
+        
+        Nuevo gestorNuevo = new Nuevo(textPane1, errorTextArea, errorScrollPane, botonSintactico, tokens);
+        nuevoItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                gestorNuevo.limpiarInterfaz();
+            }
+        });
+
     }
 
     private void realizarAnalisisLexico() {
@@ -282,8 +350,8 @@ private void realizarAnalisisSintactico() {
 
                 List<String> errores = analizadorSintactico.mostrarErrores();
                 if (!errores.isEmpty()) {
-                    mostrarErrores(String.join("\n", errores)); 
-                    return; 
+                    mostrarErrores(String.join("\n", errores));
+                    return;
                 } else {
                     mostrarErrores("");
                 }
@@ -310,4 +378,27 @@ private void realizarAnalisisSintactico() {
         }
     }
 
+    private void abrirArchivo() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Seleccione el archivo de entrada");
+
+        int seleccion = fileChooser.showOpenDialog(this);
+        if (seleccion == JFileChooser.APPROVE_OPTION) {
+            File archivo = fileChooser.getSelectedFile();
+
+            try (BufferedReader reader = new BufferedReader(new FileReader(archivo))) {
+                textPane1.setText("");
+                String linea;
+                StringBuilder contenido = new StringBuilder();
+
+                while ((linea = reader.readLine()) != null) {
+                    contenido.append(linea).append("\n");
+                }
+                textPane1.setText(contenido.toString());
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Error al abrir el archivo: " + ex.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
 }
