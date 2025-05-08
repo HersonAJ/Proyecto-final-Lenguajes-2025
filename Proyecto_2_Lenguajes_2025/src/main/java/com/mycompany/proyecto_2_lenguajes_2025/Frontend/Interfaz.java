@@ -7,7 +7,6 @@ package com.mycompany.proyecto_2_lenguajes_2025.Frontend;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico.AnalizadorSintactico2;
 import com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico.GeneradorSalida;
-import com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico.GeneradorSalida2;
 import com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico.GeneradorSalida3;
 import com.mycompany.proyecto_2_lenguajes_2025.Backend.AnalisisLexico.AnalizadorLexico;
 import com.mycompany.proyecto_2_lenguajes_2025.Lexer.ErrorToken;

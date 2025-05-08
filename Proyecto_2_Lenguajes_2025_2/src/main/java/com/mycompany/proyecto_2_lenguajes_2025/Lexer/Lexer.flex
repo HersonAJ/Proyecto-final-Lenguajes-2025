@@ -27,7 +27,7 @@ import com.mycompany.proyecto_2_lenguajes_2025.Token;
                             { return new Token("PALABRA_RESERVADA", yytext(), yyline + 1, yycolumn + 1); }
 
 /* Operadores aritméticos y paréntesis */
-"+"|"-"|"*"|"/"|"("|")"     { return new Token("OPERADOR_ARITMETICO", yytext(), yyline + 1, yycolumn + 1); }
+"^"|"+"|"-"|"*"|"/"|"("|")" { return new Token("OPERADOR_ARITMETICO", yytext(), yyline + 1, yycolumn + 1); }
 
 /* Operador de asignación */
 "="                         { return new Token("OPERADOR_ASIGNACION", yytext(), yyline + 1, yycolumn + 1); }

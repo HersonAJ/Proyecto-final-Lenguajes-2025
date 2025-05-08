@@ -2,6 +2,7 @@ package com.mycompany.proyecto_2_lenguajes_2025.Backend.AnalisisLexico;
 
 import com.mycompany.proyecto_2_lenguajes_2025.Lexer.ErrorToken;
 import com.mycompany.proyecto_2_lenguajes_2025.Lexer.Lexer;
+import com.mycompany.proyecto_2_lenguajes_2025.Lexer.Lexer2;
 import com.mycompany.proyecto_2_lenguajes_2025.Lexer.Token;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ public class AnalizadorLexico {
 
     // Método para realizar el análisis léxico
     public List<Token> realizarAnalisis(String textoEntrada, List<ErrorToken> errores) {
-        Lexer lexer = new Lexer(new StringReader(textoEntrada));
+        Lexer2 lexer = new Lexer2(new StringReader(textoEntrada));
         List<Token> tokens = new ArrayList<>(); 
 
         try {

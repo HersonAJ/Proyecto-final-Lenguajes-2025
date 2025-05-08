@@ -45,7 +45,7 @@ public class AnalizadorSintactico2 {
                 double resultado = expresion();
                 System.out.println("Resultado de la expresión: " + resultado);
             } else {
-                consumirToken(); // Ignorar cualquier otro token desconocido sin error
+                consumirToken(); 
             }
         }
     }
@@ -81,25 +81,24 @@ public class AnalizadorSintactico2 {
             double terminoValor = termino();
             resultado = operador.equals("+") ? resultado + terminoValor : resultado - terminoValor;
         }
-        //System.out.println("Resultado de la expresión: " + resultado);
         return resultado;
     }
 
     private double termino() {
-        double resultado = factor();
+        double resultado = potencia();
         while (tokenActual.getValor().equals("*") || tokenActual.getValor().equals("/")) {
             String operador = tokenActual.getValor();
-            Token token = tokenActual;
+            Token token = tokenActual; 
             consumirToken();
-            double factorValor = factor();
+            double siguienteValor = potencia(); 
             if (operador.equals("*")) {
-                resultado *= factorValor;
+                resultado *= siguienteValor;
             } else {
-                if (factorValor == 0) {
+                if (siguienteValor == 0) {
                     agregarError(token, "División por cero");
                     return resultado;
                 }
-                resultado /= factorValor;
+                resultado /= siguienteValor;
             }
         }
         return resultado;
@@ -119,7 +118,7 @@ public class AnalizadorSintactico2 {
                 return valor;
             } else {
                 agregarError(tokenActual, "Identificador no declarado. Se debe asignar antes de usar.");
-                consumirToken(); // Avanzar el token para evitar bloqueos
+                consumirToken(); 
                 return 0;
             }
         } else if (tokenActual.getValor().equals("(")) {
@@ -137,6 +136,18 @@ public class AnalizadorSintactico2 {
         }
     }
 
+    private double potencia() {
+        double resultado = factor(); 
+
+        // Si se encuentra el operador '^'
+        if (tokenActual.getValor().equals("^")) {
+            consumirToken();  // se consume '^'
+            double exponente = potencia(); 
+            resultado = Math.pow(resultado, exponente);
+        }
+        return resultado;
+    }
+
     private void estructuraPrint() {
         consumirToken(); // Avanzar después de "PRINT"
 
@@ -144,11 +155,11 @@ public class AnalizadorSintactico2 {
             System.out.println(tokenActual.getValor().replace("\"", "")); // Mostrar sin comillas
             consumirToken();
         } else if (tokenActual.getTipo().equals("NUMERO_ENTERO")) {
-            System.out.println(tokenActual.getValor()); // Mostrar el número
+            System.out.println(tokenActual.getValor()); 
             consumirToken();
         } else if (tokenActual.getTipo().equals("IDENTIFICADOR")) {
             if (tablaSimbolos.containsKey(tokenActual.getValor())) {
-                System.out.println(tablaSimbolos.get(tokenActual.getValor())); // Mostrar valor del identificador
+                System.out.println(tablaSimbolos.get(tokenActual.getValor())); 
                 consumirToken();
             } else {
                 agregarError(tokenActual, "Identificador no declarado en PRINT.");
@@ -227,10 +238,10 @@ public class AnalizadorSintactico2 {
         String resultado = "";
 
         if (tokenActual.getTipo().equals("LITERAL")) {
-            resultado = tokenActual.getValor().replace("\"", ""); // Sin comillas
+            resultado = tokenActual.getValor().replace("\"", ""); 
             consumirToken();
         } else if (tokenActual.getTipo().equals("NUMERO_ENTERO")) {
-            resultado = tokenActual.getValor(); // Número sin cambios
+            resultado = tokenActual.getValor(); 
             consumirToken();
         } else if (tokenActual.getTipo().equals("IDENTIFICADOR")) {
             if (tablaSimbolos.containsKey(tokenActual.getValor())) {
@@ -299,7 +310,7 @@ public class AnalizadorSintactico2 {
             }
         } else {
             // Ignorar estructuras anidadas hasta encontrar el END del IF externo
-            int nivel = 1; // Nivel de anidamiento de estructuras que usan END
+            int nivel = 1; 
 
             while (nivel > 0 && !tokenActual.getTipo().equals("EOF")) {
                 if (tokenActual.getValor().equals("IF") || tokenActual.getValor().equals("PRINT") || tokenActual.getValor().equals("REPEAT")) {
@@ -309,12 +320,11 @@ public class AnalizadorSintactico2 {
                 }
 
                 if (nivel > 0) {
-                    consumirToken(); // No consumir el END final del IF aún
+                    consumirToken(); 
                 }
             }
         }
 
-        // Ahora consumir END que cierra el IF
         if (!tokenActual.getValor().equals("END")) {
             agregarError(tokenActual, "Se esperaba la palabra reservada END para finalizar IF.");
         } else {
