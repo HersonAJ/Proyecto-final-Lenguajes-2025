@@ -7,6 +7,8 @@ package com.mycompany.proyecto_2_lenguajes_2025.Frontend;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico.AnalizadorSintactico2;
 import com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico.GeneradorSalida;
+import com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico.GeneradorSalida2;
+import com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico.GeneradorSalida3;
 import com.mycompany.proyecto_2_lenguajes_2025.Backend.AnalisisLexico.AnalizadorLexico;
 import com.mycompany.proyecto_2_lenguajes_2025.Lexer.ErrorToken;
 import com.mycompany.proyecto_2_lenguajes_2025.Lexer.Token;
@@ -306,50 +308,40 @@ public class Interfaz extends JFrame {
     }
 
     private void realizarAnalisisSintactico() {
-        if (tokens != null && !tokens.isEmpty()) {
-            AnalizadorSintactico2 analizadorSintactico = new AnalizadorSintactico2(tokens);
-            try {
-                analizadorSintactico.parse();
-
-                List<String> errores = analizadorSintactico.mostrarErrores();
-                if (!errores.isEmpty()) {
-                    System.out.println("Errores encontrados en el análisis sintáctico:");
-                    System.out.println(String.join("\n", errores)); // Mostrar los errores en consola
-                    mostrarErrores(String.join("\n", errores));
-                    return;
-                } else {
-                    System.out.println("No se encontraron errores sintácticos."); // Mensaje para depuración
-                    mostrarErrores(""); // Limpiar área de errores si no hay problemas
-                }
-
-                // Convertir tabla de símbolos a string
-                Map<String, String> tablaSimbolosString = new HashMap<>();
-                for (Map.Entry<String, Double> entry : analizadorSintactico.getTablaSimbolos().entrySet()) {
-                    tablaSimbolosString.put(entry.getKey(), String.valueOf(entry.getValue()));
-                }
-
-                System.out.println("Tabla de símbolos:");
-                for (Map.Entry<String, String> entry : tablaSimbolosString.entrySet()) {
-                    System.out.println(entry.getKey() + " = " + entry.getValue());
-                }
-
-                // **Solo generar archivo si NO hay errores sintácticos**
-                if (errores.isEmpty()) {
-                    System.out.println("GeneradorSalida se ejecutará.");
-                    GeneradorSalida generador = new GeneradorSalida(tokens, tablaSimbolosString);
-                    generador.generarArchivo();
-                } else {
-                    System.out.println("GeneradorSalida NO se ejecutará debido a errores sintácticos.");
-                }
-
-            } catch (AnalizadorSintactico2.ErrorSintactico e) {
-                System.out.println("Se capturó un ErrorSintáctico: " + e.getMessage());
-                mostrarErrores(e.getMessage()); // Captura errores sintácticos si ocurren
-            }
-        } else {
-            JOptionPane.showMessageDialog(this, "No hay tokens disponibles para analizar.", "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
+         if (tokens != null && !tokens.isEmpty()) {
+             AnalizadorSintactico2 analizadorSintactico = new AnalizadorSintactico2(tokens);
+             try {
+                 analizadorSintactico.parse();
+ 
+                 List<String> errores = analizadorSintactico.mostrarErrores();
+                 if (!errores.isEmpty()) {
+                     mostrarErrores(String.join("\n", errores));
+                     return;
+                 } else {
+                     mostrarErrores("");
+                 }
+ 
+                 Map<String, String> tablaSimbolosString = new HashMap<>();
+                 for (Map.Entry<String, Double> entry : analizadorSintactico.getTablaSimbolos().entrySet()) {
+                     tablaSimbolosString.put(entry.getKey(), String.valueOf(entry.getValue()));
+                 }
+ 
+                 System.out.println("Tabla de símbolos:");
+                 for (Map.Entry<String, String> entry : tablaSimbolosString.entrySet()) {
+                     System.out.println(entry.getKey() + " = " + entry.getValue());
+                 }
+ 
+                 // **Solo generar archivo si no hay errores sintácticos**
+                 GeneradorSalida3 generador = new GeneradorSalida3(tokens, tablaSimbolosString);
+                 generador.generarArchivo();
+ 
+             } catch (AnalizadorSintactico2.ErrorSintactico e) {
+                 mostrarErrores(e.getMessage()); // Captura errores sintácticos si ocurren
+             }
+         } else {
+             JOptionPane.showMessageDialog(this, "No hay tokens disponibles para analizar.", "Error", JOptionPane.ERROR_MESSAGE);
+         }
+     }
 
     private void abrirArchivo() {
         JFileChooser fileChooser = new JFileChooser();

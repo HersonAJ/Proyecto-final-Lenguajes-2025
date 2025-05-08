@@ -8,6 +8,7 @@ import com.formdev.flatlaf.FlatLightLaf;
 import com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico.AnalizadorSintactico;
 import com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico.AnalizadorSintactico2;
 import com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico.GeneradorSalida;
+import com.mycompany.proyecto_2_lenguajes_2025.AnalisisSintactico.GeneradorSalida2;
 import com.mycompany.proyecto_2_lenguajes_2025.Backend.AnalisisLexico.AnalizadorLexico;
 import com.mycompany.proyecto_2_lenguajes_2025.Lexer.ErrorToken;
 import com.mycompany.proyecto_2_lenguajes_2025.Lexer.Token;
@@ -23,6 +24,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.*;
 import javax.swing.undo.UndoManager;
 
@@ -30,6 +32,7 @@ import javax.swing.undo.UndoManager;
  *
  * @author herson
  */
+//este es del proyecto version 2
 public class Interfaz extends JFrame {
 
     private JTextPane textPane1;
@@ -328,24 +331,49 @@ private void realizarAnalisisSintactico() {
 private void realizarAnalisisSintactico() {
     if (tokens != null && !tokens.isEmpty()) {
         AnalizadorSintactico2 analizadorSintactico = new AnalizadorSintactico2(tokens);
-    try {
-        analizadorSintactico.parse();
-        List<String> errores = analizadorSintactico.mostrarErrores();
-        if (!errores.isEmpty()) {
-            mostrarErrores(String.join("\n", errores));
-            return;
-        } else {
-            mostrarErrores("");
-        }
-        // ...
-    } catch (AnalizadorSintactico2.ErrorSintactico e) {
-        mostrarErrores(e.getMessage());
-    }
+        try {
+            analizadorSintactico.parse();
+            List<String> errores = analizadorSintactico.mostrarErrores();
 
+            if (!errores.isEmpty()) {
+                System.out.println("Errores encontrados:");
+                System.out.println(String.join("\n", errores)); // Mostrar los errores en consola para depuración
+                mostrarErrores(String.join("\n", errores));
+                return;
+            } else {
+                System.out.println("No se encontraron errores sintácticos."); // Mensaje de depuración
+                mostrarErrores(""); // Limpiar área de errores si no hay problemas
+            }
+
+            // Convertir tabla de símbolos a String
+            Map<String, String> tablaSimbolosString = new HashMap<>();
+            for (Map.Entry<String, Double> entry : analizadorSintactico.getTablaSimbolos().entrySet()) {
+                tablaSimbolosString.put(entry.getKey(), String.valueOf(entry.getValue()));
+            }
+
+            System.out.println("Tabla de símbolos:");
+            for (Map.Entry<String, String> entry : tablaSimbolosString.entrySet()) {
+                System.out.println(entry.getKey() + " = " + entry.getValue());
+            }
+
+            // **Solo lanzar GeneradorSalida2 si NO hay errores sintácticos**
+            if (errores.isEmpty()) {
+                System.out.println("GeneradorSalida2 se ejecutará."); // Mensaje para verificar ejecución
+                GeneradorSalida2 generador = new GeneradorSalida2(tokens, tablaSimbolosString);
+                generador.generarArchivo();
+            } else {
+                System.out.println("GeneradorSalida2 NO se ejecutará debido a errores sintácticos.");
+            }
+
+        } catch (AnalizadorSintactico2.ErrorSintactico e) {
+            System.out.println("Se capturó un ErrorSintáctico: " + e.getMessage());
+            mostrarErrores(e.getMessage());
+        }
     } else {
         JOptionPane.showMessageDialog(this, "No hay tokens disponibles para analizar.", "Error", JOptionPane.ERROR_MESSAGE);
     }
 }
+
 
 
     private void abrirArchivo() {
