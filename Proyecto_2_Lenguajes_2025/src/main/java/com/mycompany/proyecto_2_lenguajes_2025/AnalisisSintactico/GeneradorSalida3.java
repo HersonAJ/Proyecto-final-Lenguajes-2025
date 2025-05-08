@@ -153,11 +153,21 @@ public class GeneradorSalida3 {
     private String extraerContenidoPrint(Token token) {
         switch (token.getTipo()) {
             case "LITERAL":
+                // Retorna el literal sin comillas
                 return token.getValor().replace("\"", "");
             case "NUMERO_ENTERO":
-                return token.getValor();
+                double numero = Double.parseDouble(token.getValor());
+                int entero = (int) numero;
+                return String.valueOf(entero);
             case "IDENTIFICADOR":
-                return tablaSimbolos.getOrDefault(token.getValor(), "0");
+                String valor = tablaSimbolos.getOrDefault(token.getValor(), "0");
+                try {
+                    double numeroId = Double.parseDouble(valor);
+                    int enteroId = (int) numeroId;
+                    return String.valueOf(enteroId);
+                } catch (NumberFormatException e) {
+                    return valor;
+                }
             default:
                 return null;
         }

@@ -77,15 +77,14 @@ public class GeneradorSalida2 {
                 }
             }
 
-            // Verificar si estamos dentro de un IF. Si es así, no procesamos PRINT
+            // Verificar si esta dentro de un IF. no procesa PRINT
             if (valor.equals("PRINT") && (i + 1) < tokens.size()) {
                 if (contexto.contains("IF")) {
-                    // Estamos dentro de un IF, lo ignora
-                    i += 1; // Saltar el contenido también
+                    i += 1;
                     continue;
                 }
 
-                // Estamos fuera de un IF, procesamos el PRINT
+                // Esta fuera de un IF, procesa el PRINT
                 Token contenidoPrint = tokens.get(i + 1);
                 String contenido = extraerContenidoPrint(contenidoPrint);
                 if (contenido != null) {
@@ -114,24 +113,20 @@ public class GeneradorSalida2 {
 
                 // Verificar que INIT siga después del numero
                 if ((i + 2) < tokens.size() && tokens.get(i + 2).getValor().equals("INIT")) {
-                    i += 3; // Avanzamos al primer token dentro del bloque REPEAT
+                    i += 3; 
 
                     List<Token> bloqueRepeat = new ArrayList<>();
 
-                    // Extraemos el bloque de instrucciones completo hasta encontrar el END que cierra la repetición
                     while (i < tokens.size()) {
-                        // Si encontramos un END que no forma parte de una instrucción PRINT, se asume que cierra el bloque REPEAT
                         if (tokens.get(i).getValor().equals("END")) {
                             i++; // Se consume el END final del bloque REPEAT
                             break;
                         }
 
-                        // Esperamos el patrón: PRINT <contenido> END
                         if (tokens.get(i).getValor().equals("PRINT") && (i + 2) < tokens.size()) {
-                            // Agregamos la instrucción completa al bloque
+                            // Agrega la instrucción completa al bloque
                             bloqueRepeat.add(tokens.get(i));       // token PRINT
                             bloqueRepeat.add(tokens.get(i + 1));     // contenido del PRINT
-                            // Se asume que tokens.get(i+2) es el END de la instrucción PRINT, por ello se salta
                             i += 3;
                         } else {
                             // En caso de que el patrón no concuerde, se agrega el token y se continúa
@@ -145,7 +140,7 @@ public class GeneradorSalida2 {
                         StringWriter stringWriter = new StringWriter();
                         BufferedWriter bufferedWriter = new BufferedWriter(stringWriter);
 
-                        // Procesamos cada instrucción en el bloque repeat
+                        // Procesa cada instrucción en el bloque repeat
                         for (int k = 0; k < bloqueRepeat.size(); k++) {
                             Token token = bloqueRepeat.get(k);
 
@@ -155,7 +150,7 @@ public class GeneradorSalida2 {
                                 if (contenido != null) {
                                     bufferedWriter.write(contenido + "\n");
                                 }
-                                k++; // Saltamos el token correspondiente al contenido
+                                k++; 
                             }
                         }
 
@@ -174,11 +169,10 @@ public class GeneradorSalida2 {
         while (i < tokens.size()) {
             Token tokenActual = tokens.get(i);
 
-            // Si encontramos el token IF, procedemos a procesar la estructura condicional
             if (tokenActual.getValor().equals("IF")) {
                 // Verificar que exista el siguiente token para la condición (TRUE o FALSE)
                 if (i + 1 >= tokens.size()) {
-                    break; // Estructura incompleta.
+                    break; 
                 }
                 Token tokenCondicion = tokens.get(i + 1);
                 boolean condicion = false;
@@ -196,37 +190,31 @@ public class GeneradorSalida2 {
 
                 // Verificar que el siguiente token sea THEN
                 if (i + 2 < tokens.size() && tokens.get(i + 2).getValor().equals("THEN")) {
-                    i += 3; // Avanzamos a la parte opcional del PRINT o directamente al END
+                    i += 3; 
                 } else {
                     i++;
-                    continue; // Estructura mal formada, se continúa con el siguiente token.
+                    continue; 
                 }
 
-                // Variable para almacenar el contenido de PRINT si está presente (la parte opcional)
                 String contenidoPrint = null;
 
                 // Verificar si existe una estructura PRINT anidada
                 if (i < tokens.size() && tokens.get(i).getValor().equals("PRINT")) {
-                    // Se espera que después del token PRINT venga el contenido y luego el token END
                     if (i + 1 < tokens.size()) {
                         Token tokenPrintContenido = tokens.get(i + 1);
                         contenidoPrint = extraerContenidoPrint(tokenPrintContenido);
                     }
-                    // Se espera que el siguiente token sea el END que cierra la instrucción PRINT
                     if (i + 2 < tokens.size() && tokens.get(i + 2).getValor().equals("END")) {
-                        // Se salta la estructura PRINT (PRINT, contenido y END)
                         i += 3;
                     } else {
-                        // Si la estructura PRINT está mal formada, avanzamos un token
                         i++;
                     }
                 }
 
-                // Finalmente, se espera el token END que cierra la estructura condicional IF
+                // se espera el token END que cierra la estructura condicional IF
                 if (i < tokens.size() && tokens.get(i).getValor().equals("END")) {
-                    i++; // Se consume el END final de la estructura condicional.
+                    i++; 
                 } else {
-                    // Si no se encuentra el token END esperado, avanzamos de todos modos
                     i++;
                 }
 
@@ -235,11 +223,9 @@ public class GeneradorSalida2 {
                     writer.write(contenidoPrint + "\n");
                 }
 
-                // Continuar el ciclo para seguir procesando otros tokens.
                 continue;
             }
 
-            // Si el token actual no es IF, simplemente avanzamos.
             i++;
         }
     }
@@ -247,11 +233,21 @@ public class GeneradorSalida2 {
     private String extraerContenidoPrint(Token token) {
         switch (token.getTipo()) {
             case "LITERAL":
+                // Retorna el literal sin comillas
                 return token.getValor().replace("\"", "");
             case "NUMERO_ENTERO":
-                return token.getValor();
+                double numero = Double.parseDouble(token.getValor());
+                int entero = (int) numero;
+                return String.valueOf(entero);
             case "IDENTIFICADOR":
-                return tablaSimbolos.getOrDefault(token.getValor(), "0");
+                String valor = tablaSimbolos.getOrDefault(token.getValor(), "0");
+                try {
+                    double numeroId = Double.parseDouble(valor);
+                    int enteroId = (int) numeroId;
+                    return String.valueOf(enteroId);
+                } catch (NumberFormatException e) {
+                    return valor;
+                }
             default:
                 return null;
         }
